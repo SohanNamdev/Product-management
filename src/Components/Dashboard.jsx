@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Slider from "../Components/Slider";
 import Card from "../Components/Card";
 import { FiShoppingCart } from "react-icons/fi";
-import { IoMdClose } from "react-icons/io";
 import { FaSearch } from "react-icons/fa";
 
 const Dashboard = () => {
@@ -26,12 +25,18 @@ const Dashboard = () => {
   const [editProductId, setEditProductId] = useState(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (!localStorage.getItem("loggedIn")) {
+    const storedUser = localStorage.getItem("user");
+    if (!localStorage.getItem("loggedIn") || !storedUser) {
       navigate("/login");
     } else {
-      setUser(storedUser);
-      setNewName(storedUser?.username || "");
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setNewName(parsedUser?.username || "");
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        navigate("/login");
+      }
     }
 
     fetch("https://dummyjson.com/products")
@@ -49,13 +54,16 @@ const Dashboard = () => {
     setCart((prevCart) => {
       const exists = prevCart.find((item) => item.id === product.id);
       if (exists) {
-        return prevCart.map((item) =>
+        const updatedCart = prevCart.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
+        return updatedCart;
       }
-      return [...prevCart, { ...product, quantity: 1 }];
+      const updatedCart = [...prevCart, { ...product, quantity: 1 }];
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return updatedCart;
     });
-    localStorage.setItem("cart", JSON.stringify(cart));
   };
 
   const handleRemoveFromCart = (id) => {
@@ -123,7 +131,13 @@ const Dashboard = () => {
             {cart.length > 0 && <span className="bg-red-500 text-white text-xs rounded-full px-1 absolute top-0 right-0">{cart.length}</span>}
           </div>
           <div className="relative flex items-center cursor-pointer" onClick={() => navigate("/profile")}>
-            {user?.profileImage && <img src={user.profileImage} alt="Profile" className="w-8 h-8 rounded-full" />}
+            {user?.profileImage ? (
+              <img src={user.profileImage} alt="Profile" className="w-8 h-8 rounded-full" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                <span className="text-black font-semibold">{user?.username?.charAt(0)}</span>
+              </div>
+            )}
             <span className="ml-2 text-black font-semibold">{user?.username}</span>
           </div>
         </div>

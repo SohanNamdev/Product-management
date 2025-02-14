@@ -1,94 +1,120 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-  const [user, setUser] = useState({
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
     email: "",
     password: "",
     first_name: "",
     last_name: "",
+    term: 1,
     phone: "",
+    referrer: ""
   });
-  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSignUp = async (e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch("https://hellostay.com/api/auth/register", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          ...user,
-          term: 1,
-          referrer: "",
-        }),
+        body: JSON.stringify(formData)
       });
       const data = await response.json();
       if (response.ok) {
-        alert("Registration successful. Please login.");
         navigate("/login");
       } else {
-        alert("Sign-up failed: " + data.message);
+        setError(data.message || "Registration failed");
       }
     } catch (error) {
-      console.error("Error during registration:", error);
-      alert("Something went wrong. Please try again.");
+      setError("An error occurred. Please try again.");
     }
   };
 
   return (
     <div className="h-screen flex justify-center items-center bg-gray-100">
-      <div className="w-96 h-[60%]">
-        <img
-          className="w-full h-full object-cover rounded-l-xl"
-          src="https://images.unsplash.com/photo-1580983696793-3500a8a0b7f4?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt=""
-        />
-      </div>
-      <div className="p-8 bg-white h-[60%] shadow-lg rounded-lg w-96">
+      <div className="p-8 bg-white shadow-lg rounded-lg w-96">
         <h2 className="text-2xl font-semibold text-center mb-4">Sign Up</h2>
-        <form onSubmit={handleSignUp} className="space-y-4">
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
+            name="first_name"
             placeholder="First Name"
             className="w-full p-3 border rounded"
             required
-            onChange={(e) => setUser({ ...user, first_name: e.target.value })}
+            onChange={handleChange}
           />
           <input
             type="text"
+            name="last_name"
             placeholder="Last Name"
             className="w-full p-3 border rounded"
             required
-            onChange={(e) => setUser({ ...user, last_name: e.target.value })}
+            onChange={handleChange}
           />
           <input
             type="email"
+            name="email"
             placeholder="Email"
             className="w-full p-3 border rounded"
             required
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
+            onChange={handleChange}
           />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 border rounded"
-            required
-            onChange={(e) => setUser({ ...user, password: e.target.value })}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              className="w-full p-3 border rounded"
+              required
+              onChange={handleChange}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-3"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           <input
             type="text"
+            name="phone"
             placeholder="Phone"
             className="w-full p-3 border rounded"
             required
-            onChange={(e) => setUser({ ...user, phone: e.target.value })}
+            onChange={handleChange}
           />
-          <button className="w-full bg-blue-500 text-white p-3 rounded">
+          <input
+            type="text"
+            name="referrer"
+            placeholder="Referrer"
+            className="w-full p-3 border rounded"
+            onChange={handleChange}
+          />
+          <button type="submit" className="w-full bg-blue-500 text-white p-3 rounded">
             Sign Up
           </button>
         </form>
+        <p className="text-center mt-4">
+          Already have an account?{" "}
+          <span
+            className="text-blue-500 cursor-pointer"
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </span>
+        </p>
       </div>
     </div>
   );

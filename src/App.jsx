@@ -3,7 +3,8 @@ import SignUp from "./Components/SignUp";
 import Login from "./Components/Login";
 import Dashboard from "./Components/Dashboard";
 import Profile from "./Components/Profile";
-import CartDetails from "./Components/CartDetails"; // Import the CartDetails component
+import CartDetails from "./Components/CartDetails";
+import ProtectedRoute from "./Components/ProtectedRoute"; // Import the ProtectedRoute component
 
 const App = () => {
   return (
@@ -11,9 +12,30 @@ const App = () => {
       <Routes>
         <Route path="/" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/cart-details" element={<CartDetails />} /> {/* Add the CartDetails route */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart-details"
+          element={
+            <ProtectedRoute>
+              <CartDetails />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
